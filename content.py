@@ -8,59 +8,99 @@ api_port = 8000
 
 
 #users
-users = [{'username':'alice', 'password':'wonderland','expected_code':'200'},
-	{'username':'bob', 'password':'builder', 'expected_code':'200'},
-	{'username':'clementine', 'password':'mandarine', 'expected_code':'403'}]
+user = {'username':'alice', 'password':'wonderland'}
 
 outputs = []
+sentences = [{'sentence':'life is beautiful', 'expected_score': 'positive'}, {'sentence':'that sucks', 'expected_score':'negative'}]
 
-for u in users:
-	# requête
-	r = requests.get(
-	    url='http://{address}:{port}/permissions'.format(address=api_address, port=api_port),
+for sentence in sentences:
+	#requête v1
+	v1 = requests.get(
+	    url='http://{address}:{port}/v1/sentiment'.format(address=api_address, port=api_port),
 	    params= {
-	        'username': u['username'],
-	        'password': u['password']
+	        'username': user['username'],
+	        'password': user['password'],
+		'sentence': sentence['sentence']
 	    }
 	)
 
-
-	output = '''
+	output_v1 = '''
 	============================
-	    Authentication test
+	    V1/sentiment test
 	============================
 
-	request done at "/permissions"
+	request done at "/v1/sentiment"
 	| username= {username}
 	| password= {password}
+	| sentence = {sentence}
 
-	expected result = {expected_code}
-	actual restult = {status_code}
+	expected result = {expected_score}
+	actual result = {score}
 
 	==>  {test_status}
 
 	'''
 
-	outputs.append(output)
+	outputs.append(output_v1)
+
+	#requête v2
+	v2 = requests.get(
+	    url='http://{address}:{port}/v2/sentiment'.format(address=api_address, port=api_port),
+	    params= {
+	        'username': user['username'],
+	        'password': user['password'],
+		'sentence': sentence['sentence']
+	    }
+	)
+
+	output_v2 = '''
+	============================
+	    V2/sentiment test
+	===========================
+
+	request done at "/v2/sentiment"
+	| username= {username}
+	| password= {password}
+	| sentence = {sentence}
+
+	expected result = {expected_score}
+	actual result = {score}
+
+	==>  {test_status}
+
+	'''
+
+	outputs.append(output_v2)
+
 
 	#username and password
-	username = u['username']
-	password = u['password']
-	#expected code
-	expected_code = u['expected_code']	
+	username = user['username']
+	password = user['password']
 
-	# statut de la requête
-	status_code = r.status_code
+	req = [v1, v2]
+	for r in req:
+		score = r.json()['score']
 
-	# affichage des résultats
-	if status_code == 200:
-	    test_status = 'SUCCESS'
-	else:
-	    test_status = 'FAILURE'
-	print(output.format(username=username, password=password, expected_code=expected_code, status_code=status_code, test_status=test_status))
+		if score >= 0:
+			real_score = 'positive'
+		if score < 0:
+			real_score = 'negative'
+
+		# affichage des résultats
+		expected_score = sentence['expected_score']
+
+		if real_score == expected_score:
+			test_status = 'SUCCESS'
+		else:
+			test_status = 'FAILURE'
+		if r == v1:
+
+			print(output_v1.format(username=username, password=password, sentence=sentence['sentence'], expected_score=expected_score, score=score, test_status=test_status))
+		if r == v2:
+			print(output_v2.format(username=username, password=password, sentence=sentence['sentence'], expected_score=expected_score, score=score, test_status=test_status))
 
 	# impression dans un fichier
 	if os.environ.get('LOG') == 1:
-	    with open('api_test.log', 'a') as file:
-	        file.write(outputs)
+		with open('api_test.log', 'a') as file:
+			file.write(outputs)
 
