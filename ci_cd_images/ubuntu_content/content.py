@@ -1,6 +1,7 @@
 import os
 import requests
 from datetime import datetime
+import time
 
 # définition de l'adresse de l'API
 api_address = '172.22.0.2'
@@ -107,5 +108,5 @@ for sentence in sentences:
 		with open('/home/tests/api_test.log', 'a') as file:
 			file.write(output_v1.format(date_log=date_log, username=username, password=password, sentence=sentence['sentence'], expected_score=expected_score, score=score, test_status=test_status))
 			file.write(output_v2.format(date_log=date_log, username=username, password=password, sentence=sentence['sentence'], expected_score=expected_score, score=score, test_status=test_status))
-
+	time.sleep(1)
 

@@ -1,0 +1,28 @@
+#Creation du volume
+~$docker volume create --name test_logs
+
+#Creation du réseau
+~$docker network create  --subnet 172.22.0.0/16 --gateway 172.22.0.1 network_fastapi
+
+#Création des trois images
+~/tp_ci_cd/ci_cd_images/ubuntu_auth$ docker image build . -t ubuntu_auth
+
+~/tp_ci_cd/ci_cd_images/ubuntu_perm$ docker image build . -t ubuntu_perm
+
+~/tp_ci_cd/ci_cd_images/ubuntu_content$ docker image build . -t ubuntu_content
+
+
+
+# Il faut lancer le container "datascientest/fastapi:1.0.0" avec les bons paramètres avant de lancer la commande "docker-compose up"
+
+~$ddocker container run --network network_fastapi --ip 172.22.0.2 --name fastapi -p  8000:8000 datascientest/fastapi:1.0.0 
+
+
+#On peut enfi lancer les 3 containers qui effectueront les test automatiquement et sauvegarderont les résulats dans 
+
+~/tp_ci_cd/ci_cd_images$ docker-compose up
+
+#Cette commande permet de voir le contenu du fichier "api_test.log" qui contient l'ensemble des résultats des tests (sur la machine local)
+
+~$sudo cat tail /var/lib/docker/volumes/test_logs/_data/api_test.log
+

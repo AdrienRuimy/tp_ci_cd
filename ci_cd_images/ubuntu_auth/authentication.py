@@ -1,6 +1,7 @@
 import os
 import requests
 from datetime import datetime
+import time 
 
 # définition de l'adresse de l'API
 api_address = '172.22.0.2'
@@ -66,6 +67,6 @@ for u in users:
 		with open('/home/tests/api_test.log', 'a') as file:
 			for output in outputs:
 				file.write(output.format(date_log=date_log, username=username, password=password, expected_code=expected_code, status_code=status_code, test_status=test_status))
-
+				time.sleep(1)
 
 
