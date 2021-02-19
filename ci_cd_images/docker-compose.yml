@@ -1,0 +1,86 @@
+version: '3.9'
+services:
+  exampleservice:
+    environment:
+      - bootstrap.memory_lock=true
+    build: 
+	  - context: /path/to/DockerfileDirectory
+	  - dockerfile: DockerfileFileName
+    ports:
+      - "8080:8080"
+    volumes:
+      - /path/from/host:/path/to/container
+    privileged: true
+
+
+services:
+        fastapi:
+                image: datascientest/fastapi
+                container_name: datascientest/fastapi:10.0.0
+                networks:
+                  network_fastapi:
+		    ipv4_address: 172.22.0.3
+
+                ports:
+                        - target: 8000
+                          published: 8000
+                          protocol: tcp
+                          mode: host
+		volumes:
+			-
+
+                environment:
+			discovery.type: single-node
+
+        ubuntu_auth:
+                image: ubuntu
+                container_name: ubuntu_auth
+		build: 
+		  - context: /ci_cd_images/ubuntu_auth/
+		  - dockerfile: Dockerfile
+                networks:
+                  network_fastapi:
+		    ipv4_address: 172.22.0.3
+                environment:
+		  - LOG='1'
+		volumes:
+			- /FASTAPI_LOGS/:/home/tests/
+			privileged: true 
+ 
+       ubuntu_perm:
+                image: ubuntu_perm
+                container_name: ubuntu_perm
+		build: 
+		  - context: /ci_cd_images/ubuntu_perm/
+		  - dockerfile: Dockerfile
+                networks:
+                  network_fastapi:
+		    ipv4_address: 172.22.0.4
+
+                environment:
+                  - LOG='1'
+		volumes:
+			- /FASTAPI_LOGS/:/home/tests/
+			privileged: true 
+        ubuntu_content:
+                image:
+                container_name: ubuntu_content
+		build: 
+		  - context: /ci_cd_images/ubuntu_content
+		  - dockerfile: Dockerfile
+                networks:
+                  network_fastapi:
+		    ipv4_address: 172.22.0.5
+
+                environment:
+                  - LOG='1'
+		volumes:
+			- /FASTAPI_LOGS/:/home/tests/
+			privileged: true 
+networks:
+        network_fastapi:
+	  driver: bridge
+	  ipam:
+	    config:
+	      -  subnet: 172.22.0.0/16
+	         gateway: 172.22.0.1

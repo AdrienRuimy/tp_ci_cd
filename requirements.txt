@@ -1,0 +1,16 @@
+#Creating of volume
+
+docker volume create --name fastapi_volume
+
+#assign ip add to container ubuntu_auth
+
+docker container run --network network_fastapi --ip 172.22.0.3 --name  ubuntu_auth  ubuntu_auth
+
+#assign ip add to container fastapi
+
+docker container run --network network_fastapi --ip 172.22.0.2 --name fastapi -p  8000:8000 datascientest/fastapi:1.0.0 
+
+
+# Construction d'une image docker à partir d'un Dockerfile
+docker image build . -t ubuntu_perm
+

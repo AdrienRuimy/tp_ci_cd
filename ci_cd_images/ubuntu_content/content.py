@@ -1,8 +1,9 @@
 import os
 import requests
+from datetime import datetime
 
 # définition de l'adresse de l'API
-api_address = '127.0.0.1'
+api_address = '172.22.0.2'
 # port de l'API
 api_port = 8000
 
@@ -12,6 +13,8 @@ user = {'username':'alice', 'password':'wonderland'}
 
 outputs = []
 sentences = [{'sentence':'life is beautiful', 'expected_score': 'positive'}, {'sentence':'that sucks', 'expected_score':'negative'}]
+
+date_log = datetime.now()
 
 for sentence in sentences:
 	#requête v1
@@ -28,7 +31,7 @@ for sentence in sentences:
 	============================
 	    V1/sentiment test
 	============================
-
+	| date log = {date_log}
 	request done at "/v1/sentiment"
 	| username= {username}
 	| password= {password}
@@ -57,7 +60,7 @@ for sentence in sentences:
 	============================
 	    V2/sentiment test
 	===========================
-
+	| date_log = {date_log}
 	request done at "/v2/sentiment"
 	| username= {username}
 	| password= {password}
@@ -95,12 +98,14 @@ for sentence in sentences:
 			test_status = 'FAILURE'
 		if r == v1:
 
-			print(output_v1.format(username=username, password=password, sentence=sentence['sentence'], expected_score=expected_score, score=score, test_status=test_status))
+			print(output_v1.format(date_log=date_log, username=username, password=password, sentence=sentence['sentence'], expected_score=expected_score, score=score, test_status=test_status))
 		if r == v2:
-			print(output_v2.format(username=username, password=password, sentence=sentence['sentence'], expected_score=expected_score, score=score, test_status=test_status))
+			print(output_v2.format(date_log=date_log, username=username, password=password, sentence=sentence['sentence'], expected_score=expected_score, score=score, test_status=test_status))
 
 	# impression dans un fichier
-	if os.environ.get('LOG') == 1:
-		with open('api_test.log', 'a') as file:
-			file.write(outputs)
+	if os.environ.get('LOG') == '1':
+		with open('/home/tests/api_test.log', 'a') as file:
+			file.write(output_v1.format(date_log=date_log, username=username, password=password, sentence=sentence['sentence'], expected_score=expected_score, score=score, test_status=test_status))
+			file.write(output_v2.format(date_log=date_log, username=username, password=password, sentence=sentence['sentence'], expected_score=expected_score, score=score, test_status=test_status))
+
 

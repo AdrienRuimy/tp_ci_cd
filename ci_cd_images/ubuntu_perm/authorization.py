@@ -1,8 +1,10 @@
 import os
 import requests
+from datetime import datetime
 
 # définition de l'adresse de l'API
-api_address = '127.0.0.1'
+api_address = '172.22.0.2'
+
 # port de l'API
 api_port = 8000
 
@@ -13,10 +15,10 @@ users = [{'username':'alice', 'password':'wonderland', 'expected_code_v1':200, '
 
 outputs = []
 
+date_log = datetime.now()
 for u in users:
 	#requête v1
-	v1 = requests.get(
-	    url='http://{address}:{port}/v1/sentiment'.format(address=api_address, port=api_port),
+	v1 = requests.get(url='http://{address}:{port}/v1/sentiment'.format(address=api_address, port=api_port),
 	    params= {
 	        'username': u['username'],
 	        'password': u['password'],
@@ -28,7 +30,7 @@ for u in users:
 	============================
 	    V1/sentiment test
 	============================
-
+	| date log = {date_log}
 	request done at "/v1/sentiment"
 	| username= {username}
 	| password= {password}
@@ -43,8 +45,7 @@ for u in users:
 	outputs.append(output_v1)
 
 	#requête v2
-	v2 = requests.get(
-	    url='http://{address}:{port}/v2/sentiment'.format(address=api_address, port=api_port),
+	v2 = requests.get(url='http://{address}:{port}/v2/sentiment'.format(address=api_address, port=api_port),
 	    params= {
 	        'username': u['username'],
 	        'password': u['password'],
@@ -56,7 +57,7 @@ for u in users:
 	============================
 	    V2/sentiment test
 	===========================
-
+	| date log = {date_log}
 	request done at "/v2/sentiment"
 	| username= {username}
 	| password= {password}
@@ -87,7 +88,7 @@ for u in users:
 				test_status = 'SUCCESS'
 			else:
 				test_status = 'FAILURE'
-			print(output_v1.format(username=username, password=password, expected_code_v1=expected_code, status_code=status_code, test_status=test_status))
+			print(output_v1.format(date_log=date_log, username=username, password=password, expected_code_v1=expected_code, status_code=status_code, test_status=test_status))
 
 		if r == v2:
 			expected_code = u['expected_code_v2']
@@ -96,12 +97,12 @@ for u in users:
 				test_status = 'SUCCESS'
 			else:
 				test_status = 'FAILURE'
-			print(output_v2.format(username=username, password=password, expected_code_v2=expected_code, status_code=status_code, test_status=test_status))
+			print(output_v2.format(date_log=date_log, username=username, password=password, expected_code_v2=expected_code, status_code=status_code, test_status=test_status))
 
-
-
-# impression dans un fichier
-if os.environ.get('LOG') == 1:
-    with open('api_test.log', 'a') as file:
-        file.write(outputs)
-
+		# impression dans un fichier
+		if os.environ.get('LOG') == '1':
+			with open('/home/tests/api_test.log', 'a') as file:
+				if r == v1:
+					file.write(output_v1.format(date_log=date_log, username=username, password=password, expected_code_v1=expected_code, status_code=status_code, test_status=test_status))
+				if r == v2:
+					file.write(output_v2.format(date_log=date_log, username=username, password=password, expected_code_v2=expected_code, status_code=status_code, test_status=test_status))
